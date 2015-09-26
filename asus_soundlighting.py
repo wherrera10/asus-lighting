@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Sep 26 11:22:57 2015
-
-@author: William
-"""
 #!/usr/bin/python
 # Python 2.7 code to analyze sound and interface with ASUS G20
 
-# IMPORTANT: run as administrator
+"""
+Created on Sat Sep 26 11:22:57 2015
+@author: William Herrera
+
+IMPORTANT: run as administrator
+
+"""
 
 import pyaudio
 import numpy
@@ -57,9 +58,9 @@ def asus_soundlight():
 
     print "Starting, use Ctrl+C to stop"
     try:
-        l_lighting = lacpi.ASUS_ACPI_lighting(lacpi.dpath, lacpi.LEFT_VERTICAL)
-        r_lighting = lacpi.ASUS_ACPI_lighting(lacpi.dpath, lacpi.RIGHT_VERTICAL)
-        b_lighting = lacpi.ASUS_ACPI_lighting(lacpi.dpath, lacpi.BASE_HORIZONTAL)
+        l_lighting = lacpi.ASUSLighting(lacpi.DPATH, lacpi.LEFT_VERTICAL)
+        r_lighting = lacpi.ASUSLighting(lacpi.DPATH, lacpi.RIGHT_VERTICAL)
+        b_lighting = lacpi.ASUSLighting(lacpi.DPATH, lacpi.BASE_HORIZONTAL)
 
         while True:
             try:
