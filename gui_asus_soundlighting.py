@@ -49,7 +49,6 @@ class SoundLightApp(tki.Frame):
                                    indicatoron=0,
                                    padx=20,
                                    variable=self.audio_devnum,
-                                   command=self.get_audio_source,
                                    value=device_num)
             rbut.pack()
             if device_text.find("Mix"):
@@ -107,12 +106,6 @@ class SoundLightApp(tki.Frame):
                 mbox.showwarning("Looking for Path to dll",
                                  "ACPIWMI.dll not found in that path")
         return self.path_to_dll
-
-    def get_audio_source(self):
-        """
-        get number for audio source
-        """
-        return self.audio_devnum
 
     def get_update_frequency(self):
         """
