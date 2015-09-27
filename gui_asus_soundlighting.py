@@ -79,7 +79,7 @@ class SoundLightApp(tki.Frame):
                                  text="QUIT", fg="red",
                                  command=self.quit_app)
         quit_button.pack(side=tki.BOTTOM)
-        
+
     def pick_dll_path(self):
         """
         choose path to dll
@@ -87,10 +87,10 @@ class SoundLightApp(tki.Frame):
         path_chosen = tkfd.askdirectory(parent=self.root,
                                         initialdir=self.path_to_dll,
                                         title="Path to ACPIWMI.dll")
-        
+
         if correct_dll_path(path_chosen):
-		    self.path_to_dll = path_chosen
-        else:	
+            self.path_to_dll = path_chosen
+        else:
             mbox.showwarning(path_chosen,
                              "ACPIWMI.dll not found in this path")
         return self.path_to_dll
