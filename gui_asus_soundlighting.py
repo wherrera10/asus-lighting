@@ -19,6 +19,7 @@ import asus_soundlighting as asl
 
 import Tkinter as tki
 import tkFileDialog as tkfd
+import tkMessageBox as mbox
 
 DLLNAME = 'ACPIWMI.dll'
 def correct_dll_path(pathdir):
@@ -56,7 +57,7 @@ class SoundLightApp(tki.Frame):
 
         # choose directory to the ACPIWMI.dll
         self.path_to_dll = la.DPATH
-        tki.Button(root, text='DLL Path', command=tkfd.askdirectory).pack()
+        tki.Button(root, text='DLL Path', command=self.pick_dll_path).pack()
 
         # choose the lighting color update interval
         self.chunk_exponent = 15
@@ -64,7 +65,7 @@ class SoundLightApp(tki.Frame):
                                 from_=12, to=18,
                                 tickinterval=1,
                                 orient=tki.HORIZONTAL)
-        self.slider.set(0.5)
+        self.slider.set(15)
         self.slider.pack()
 
         # start app button
@@ -78,17 +79,33 @@ class SoundLightApp(tki.Frame):
                                  text="QUIT", fg="red",
                                  command=self.quit_app)
         quit_button.pack(side=tki.BOTTOM)
+        
+    def pick_dll_path(self):
+        """
+        choose path to dll
+        """
+        path_chosen = tkfd.askdirectory(parent=self.root,
+                                        initialdir=self.path_to_dll,
+                                        title="Path to ACPIWMI.dll")
+        
+        if correct_dll_path(path_chosen):
+		    self.path_to_dll = path_chosen
+        else:	
+            mbox.showwarning(path_chosen,
+                             "ACPIWMI.dll not found in this path")
+        return self.path_to_dll
 
     def choose_dll_path(self):
         """
         choose path to dll
         """
         if not correct_dll_path(self.path_to_dll):
-            dir_opts = {}
-            dir_opts['initialdir'] = la.DPATH
-            dir_opts['mustexist'] = True
-            dir_opts['title'] = 'Choose path to ACPIWMI.dll'
-            self.path_to_dll = tkfd.askdirectory(**dir_opts)
+            self.path_to_dll = tkfd.askdirectory(parent=self.root,
+                                                 initialdir=self.path_to_dll,
+                                                 title="Path to ACPIWMI.dll")
+            if not correct_dll_path(self.path_to_dll):
+                mbox.showwarning("Looking for Path to dll",
+                                 "ACPIWMI.dll not found in that path")
         return self.path_to_dll
 
     def get_audio_source(self):
@@ -101,7 +118,7 @@ class SoundLightApp(tki.Frame):
         """
         update interval in increments of 0.25 sec
         """
-        self.chunk_exponent = self.slider.get()
+        self.chunk_exponent = int(self.slider.get())
         return self.chunk_exponent
 
     def audio_to_lighting(self):
@@ -137,4 +154,5 @@ if __name__ == '__main__':
     ROOT = tki.Tk()
     APP = SoundLightApp(ROOT)
     ROOT.mainloop()
+
 
