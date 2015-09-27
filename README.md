@@ -5,7 +5,7 @@ By WIlliam Herrera, September 2015
 
 Acknowledgements:
 
-This code owes gretly to the following projects by others:
+The audio processing portions of this code owe greatly to the following projects by others:
 
 Scot W. Harden's Realtime FFT Audio Visualization with Python at http://www.swharden.com/blog/2013-05-09-realtime-fft-audio-visualization-with-python/
 
