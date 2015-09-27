@@ -13,13 +13,15 @@ IMPORTANT: run as administrator
 """
 
 import os
+import ctypes
 import threading
-import light_acpi as la
-import asus_soundlighting as asl
 
 import Tkinter as tki
 import tkFileDialog as tkfd
 import tkMessageBox as mbox
+
+import light_acpi as la
+import asus_soundlighting as asl
 
 DLLNAME = 'ACPIWMI.dll'
 def correct_dll_path(pathdir):
@@ -28,6 +30,24 @@ def correct_dll_path(pathdir):
     """
     return os.path.isfile(os.path.join(pathdir, DLLNAME))
 
+def terminate_thread(thread):
+    """
+    Terminates a python thread from another thread.
+    :param thread: a threading.Thread instance
+    """
+    if not thread.isAlive():
+        return
+
+    exc = ctypes.py_object(SystemExit)
+    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
+        ctypes.c_long(thread.ident), exc)
+    if res == 0:
+        raise ValueError("nonexistent thread id")
+    elif res > 1:
+        # """if it returns a number greater than one, you're in trouble,
+        # and you should call it again with exc=NULL to revert the effect"""
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(thread.ident, None)
+        raise SystemError("PyThreadState_SetAsyncExc failed")
 
 class SoundLightApp(tki.Frame):
     """
@@ -78,6 +98,8 @@ class SoundLightApp(tki.Frame):
                                  text="QUIT", fg="red",
                                  command=self.quit_app)
         quit_button.pack(side=tki.BOTTOM)
+
+        self.lighting_thread = None
 
     def pick_dll_path(self):
         """
@@ -133,13 +155,15 @@ class SoundLightApp(tki.Frame):
             """
             asl.asus_soundlight(do_print=False)
 
-        thrd = threading.Thread(target=callback)
-        thrd.start()
+        self.lighting_thread = threading.Thread(target=callback)
+        self.lighting_thread.start()
 
     def quit_app(self):
         """
         End execution of app
         """
+        if not self.lighting_thread == None:
+            terminate_thread(self.lighting_thread)
         self.root.destroy()
 
 
@@ -147,5 +171,4 @@ if __name__ == '__main__':
     ROOT = tki.Tk()
     APP = SoundLightApp(ROOT)
     ROOT.mainloop()
-
 
