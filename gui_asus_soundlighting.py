@@ -55,10 +55,6 @@ class SoundLightApp(tki.Frame):
 
         # choose directory to the ACPIWMI.dll
         self.path_to_dll = la.DPATH
-        self.dir_opts = {}
-        self.dir_opts['initialdir'] = la.DPATH
-        self.dir_opts['mustexist'] = True
-        self.dir_opts['title'] = 'Choose path to ACPIWMI.dll'
         tki.Button(self, text='DLL Path', command=tkfd.askdirectory).pack()
 
         # choose the lighting color update interval
@@ -86,7 +82,12 @@ class SoundLightApp(tki.Frame):
         """
         choose path to dll
         """
-        self.path_to_dll = tkfd.askdirectory(**self.dir_opts)
+        if not correct_dll_path(self.path_to_dll):
+            dir_opts = {}
+            dir_opts['initialdir'] = la.DPATH
+            dir_opts['mustexist'] = True
+            dir_opts['title'] = 'Choose path to ACPIWMI.dll'
+            self.path_to_dll = tkfd.askdirectory(**dir_opts)
         return self.path_to_dll
 
     def get_audio_source(self):
@@ -106,11 +107,21 @@ class SoundLightApp(tki.Frame):
         """
         begin sampling display thread
         """
+        # get and set the audio port number
+        #asl.DEVICE_NUMBER = self.audio_devnum
+
+        # get and set the dll path directory
+        la.DPATH = self.choose_dll_path()
+
+        # get and set the exponent for the chunk size
+        asl.CHUNK_EXPONENT = self.get_update_frequency()
+
         def callback():
             """
             threaded function
             """
             asl.asus_soundlight(do_print=False)
+
         thrd = threading.Thread(target=callback)
         thrd.start()
 
