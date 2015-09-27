@@ -95,9 +95,9 @@ class SoundLightApp(tki.Frame):
                              "ACPIWMI.dll not found in this path")
         return self.path_to_dll
 
-    def choose_dll_path(self):
+    def optional_choose_dll_path(self):
         """
-        choose path to dll
+        choose path to dll only if needed, error checked
         """
         if not correct_dll_path(self.path_to_dll):
             self.path_to_dll = tkfd.askdirectory(parent=self.root,
@@ -129,7 +129,7 @@ class SoundLightApp(tki.Frame):
         asl.DEVICE_NUMBER = self.audio_devnum.get()
 
         # get and set the dll path directory
-        la.DPATH = self.choose_dll_path()
+        la.DPATH = self.optional_choose_dll_path()
 
         # get and set the exponent for the chunk size
         asl.CHUNK_EXPONENT = self.get_update_frequency()
