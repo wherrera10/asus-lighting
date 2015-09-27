@@ -97,7 +97,8 @@ def asus_soundlight(do_print=True):
         pass
 
     finally:
-        print "\nStopping"
+        if do_print:
+            print "\nStopping"
         stream.close()
         paud.terminate()
 
