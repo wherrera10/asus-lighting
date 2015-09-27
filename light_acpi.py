@@ -89,7 +89,9 @@ class ASUSLighting(object): #pylint: disable-msg=C0103
         """
         Set RGB color as separate red, green, and blue values
         """
-        rgb_color = blues + (greens * 0x100) + (reds * 0x10000)
+        rgb_color = (blues & 255) + \
+                    ((greens & 255) * 0x100) + \
+                    ((reds & 255) * 0x10000)
         self.set_color(rgb_color)
 
 
