@@ -41,6 +41,7 @@ class SoundLightApp(tki.Frame):
         # choose audio input device via radio button
         num_devices, aud_dict = asl.list_devices(do_print=False)
         self.audio_devnum = tki.IntVar()
+        self.audio_devnum.set(asl.DEVICE_NUMBER)
         for device_num, device_text in aud_dict.iteritems():
             rbut = tki.Radiobutton(root,
                                    text=device_text,
@@ -55,7 +56,7 @@ class SoundLightApp(tki.Frame):
 
         # choose directory to the ACPIWMI.dll
         self.path_to_dll = la.DPATH
-        tki.Button(self, text='DLL Path', command=tkfd.askdirectory).pack()
+        tki.Button(root, text='DLL Path', command=tkfd.askdirectory).pack()
 
         # choose the lighting color update interval
         self.chunk_exponent = 15
@@ -108,7 +109,7 @@ class SoundLightApp(tki.Frame):
         begin sampling display thread
         """
         # get and set the audio port number
-        #asl.DEVICE_NUMBER = self.audio_devnum
+        asl.DEVICE_NUMBER = self.audio_devnum.get()
 
         # get and set the dll path directory
         la.DPATH = self.choose_dll_path()
