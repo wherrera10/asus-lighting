@@ -74,7 +74,6 @@ class ASUSLighting(object): #pylint: disable-msg=C0103
             dhand = windll.ACPIWMI.AsWMI_Open()
             buf = create_string_buffer('abcdefg')
             windll.ACPIWMI.AsWMI_GetDeviceStatus(dhand, repr(buf.raw))
-            print buf.raw
 
     def set_color(self, color):
         """
