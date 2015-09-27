@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/python
-# Python 2.7 code to analyze sound and interface with ASUS G20
 
 """
 Created on Sat Sep 26 11:22:57 2015
 @author: William Herrera
+
+Python 2.7 code to analyze sound and use as interface with ASUS G20 lighting
 
 IMPORTANT: run as administrator
 
@@ -18,26 +19,35 @@ import light_acpi as lacpi
 
 MAX = 0
 SEGMENTS = 9
+CHUNK_EXPONENT = 15
+DEVICE_NUMBER = 2
 
-def list_devices():
+def list_devices(do_print=True):
     """
     List all audio input devices
     """
     paud = pyaudio.PyAudio()
+    text = "Audio Device Options:\n"
+    devs = {}
     i = 0
     ndev = paud.get_device_count()
     while i < ndev:
         dev = paud.get_device_info_by_index(i)
         if dev['maxInputChannels'] > 0:
-            print str(i)+'. '+dev['name']
+            dev_line = str(i) + '. ' + dev['name']
+            devs[i] = dev_line
+            text = text + dev_line + "\n"
         i += 1
+    if do_print:
+        print text
+    return ndev, devs
 
-def asus_soundlight():
+def asus_soundlight(do_print=True):
     """
     Get sound samples and adjust LED light color accordingly
     """
     # Change chunk if too fast/slow, never less than 2**13
-    chunk = 2**15
+    chunk = 2**CHUNK_EXPONENT
     samplerate = 44100
 
     # CHANGE THIS TO CORRECT INPUT DEVICE
@@ -46,7 +56,7 @@ def asus_soundlight():
     # sound card will make your sound output an input.
     # Use list_devices() to list all your input devices
     # and choose the mixed device as input device below
-    device = 2
+    device = DEVICE_NUMBER
 
     paud = pyaudio.PyAudio()
     stream = paud.open(format=pyaudio.paInt16,
@@ -56,7 +66,8 @@ def asus_soundlight():
                        frames_per_buffer=chunk,
                        input_device_index=device)
 
-    print "Starting, use Ctrl+C to stop"
+    if do_print:
+        print "Starting, use Ctrl+C to stop"
     try:
         l_lighting = lacpi.ASUSLighting(lacpi.DPATH, lacpi.LEFT_VERTICAL)
         r_lighting = lacpi.ASUSLighting(lacpi.DPATH, lacpi.RIGHT_VERTICAL)
@@ -144,5 +155,5 @@ def calculate_levels(data, samplerate):
 
 if __name__ == '__main__':
     list_devices()
-    asus_soundlight()
+    asus_soundlight(do_print=True)
 
