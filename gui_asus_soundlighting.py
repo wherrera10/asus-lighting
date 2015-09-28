@@ -164,6 +164,8 @@ class SoundLightApp(tki.Frame):
         """
         begin sampling display thread
         """
+        if not self.lighting_thread == None:
+            terminate_thread(self.lighting_thread)
         # get and set the audio port number
         asl.DEVICE_NUMBER = self.audio_devnum.get()
 
