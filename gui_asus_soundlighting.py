@@ -17,6 +17,7 @@ import ctypes
 import threading
 
 import Tkinter as tki
+import ttk
 import tkFileDialog as tkfd
 import tkMessageBox as mbox
 
@@ -61,6 +62,8 @@ class SoundLightApp(tki.Frame):
                   text="ASUS ROG Desktop Audio Lighting Control",
                   font="Verdana 15 bold").pack()
 
+        ttk.Separator(root, orient=tki.HORIZONTAL).pack(fill=tki.BOTH, expand=1)
+
         # choose audio input device via radio button
         tki.Label(root,
                   text="Audio Device Choices",
@@ -79,6 +82,8 @@ class SoundLightApp(tki.Frame):
             if device_text.find("Mix"):
                 rbut.select()
 
+        ttk.Separator(root, orient=tki.HORIZONTAL).pack(fill=tki.BOTH, expand=1)
+
         # choose directory to the ACPIWMI.dll
         self.path_to_dll = la.DPATH
         tki.Label(root,
@@ -86,6 +91,8 @@ class SoundLightApp(tki.Frame):
                   font="Verdana 10 bold").pack()
         self.path_to_dll = la.DPATH
         tki.Button(root, text='Change Path to ACPIWMI.dll', command=self.pick_dll_path).pack()
+
+        ttk.Separator(root, orient=tki.HORIZONTAL).pack(fill=tki.BOTH, expand=1)
 
         # choose the lighting color update interval
         tki.Label(root,
@@ -99,6 +106,8 @@ class SoundLightApp(tki.Frame):
                                 orient=tki.HORIZONTAL)
         self.slider.set(15)
         self.slider.pack()
+
+        ttk.Separator(root, orient=tki.HORIZONTAL).pack(fill=tki.BOTH, expand=1)
 
         # start app button
         start_button = tki.Button(root,
