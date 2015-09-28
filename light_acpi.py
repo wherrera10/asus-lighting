@@ -38,7 +38,7 @@ class ChangeDir(object): #pylint: disable-msg=C0103, R0903
 #   The byte code for each light on the ASUS G20 desktop's LED lighting:
 #   left vertical light:   0xc00e0000
 #   right vertical light:  0xc00d0000
-#   base horizontal light: 0xc00f0000
+#   base horizontal light: 0xc00c0000
 ##########################################################################
 
 RIGHT_VERTICAL = 0xc00d0000
