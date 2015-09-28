@@ -57,9 +57,14 @@ class SoundLightApp(tki.Frame):
 
         self.root = root
         tki.Frame.__init__(self, root)
-        tki.Label(root, text="ASUS G20aj Audio Lighting Control").pack()
+        tki.Label(root,
+                  text="ASUS ROG Desktop Audio Lighting Control",
+                  font="Verdana 15 bold").pack()
 
         # choose audio input device via radio button
+        tki.Label(root,
+                  text="Audio Device Choices",
+                  font="Verdana 12 bold").pack()
         num_devices, aud_dict = asl.list_devices(do_print=False)
         self.audio_devnum = tki.IntVar()
         self.audio_devnum.set(asl.DEVICE_NUMBER)
@@ -76,9 +81,16 @@ class SoundLightApp(tki.Frame):
 
         # choose directory to the ACPIWMI.dll
         self.path_to_dll = la.DPATH
+        tki.Label(root,
+                  text="Current Path to ACPIWMI.dll is "+self.path_to_dll,
+                  font="Verdana 12 bold").pack()
+        self.path_to_dll = la.DPATH
         tki.Button(root, text='DLL Path', command=self.pick_dll_path).pack()
 
         # choose the lighting color update interval
+        tki.Label(root,
+                  text="Doubling increment for Update Interval",
+                  font="Verdana 12 bold").pack()
         self.chunk_exponent = 15
         self.slider = tki.Scale(root,
                                 from_=12, to=18,
