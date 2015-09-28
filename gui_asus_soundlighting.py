@@ -82,10 +82,10 @@ class SoundLightApp(tki.Frame):
         # choose directory to the ACPIWMI.dll
         self.path_to_dll = la.DPATH
         tki.Label(root,
-                  text="Current Path to ACPIWMI.dll is "+self.path_to_dll,
-                  font="Verdana 12 bold").pack()
+                  text="Default Path to ACPIWMI.dll is "+self.path_to_dll,
+                  font="Verdana 10 bold").pack()
         self.path_to_dll = la.DPATH
-        tki.Button(root, text='DLL Path', command=self.pick_dll_path).pack()
+        tki.Button(root, text='Change Path to ACPIWMI.dll', command=self.pick_dll_path).pack()
 
         # choose the lighting color update interval
         tki.Label(root,
@@ -95,6 +95,7 @@ class SoundLightApp(tki.Frame):
         self.slider = tki.Scale(root,
                                 from_=12, to=18,
                                 tickinterval=1,
+                                sliderlength=10,
                                 orient=tki.HORIZONTAL)
         self.slider.set(15)
         self.slider.pack()
@@ -102,12 +103,14 @@ class SoundLightApp(tki.Frame):
         # start app button
         start_button = tki.Button(root,
                                   text="Start", fg="green",
+                                  font="Verdana 14",
                                   command=self.audio_to_lighting)
         start_button.pack()
 
         # quit app button
         quit_button = tki.Button(root,
                                  text="QUIT", fg="red",
+                                 font="Verdana 14",
                                  command=self.quit_app)
         quit_button.pack(side=tki.BOTTOM)
 
