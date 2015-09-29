@@ -5,11 +5,7 @@ By WIlliam Herrera, September 2015
 
 Acknowledgements:
 
-The audio processing portions of this code owe greatly to the following projects by others:
-
-Scot W. Harden's Realtime FFT Audio Visualization with Python at http://www.swharden.com/blog/2013-05-09-realtime-fft-audio-visualization-with-python/
-
-and 
+The current audio processing portions of this code owe greatly to the following project:
 
 Juliana Pena's Arduino code at http://julip.co/2012/05/arduino-python-soundlight-spectrum/
 
