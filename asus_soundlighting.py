@@ -14,7 +14,6 @@ IMPORTANT: run as administrator
 import pyaudio
 import numpy
 import matplotlib.mlab
-import matplotlib.pylab
 import struct
 
 import light_acpi as lacpi
