@@ -13,6 +13,8 @@ IMPORTANT: run as administrator
 
 import pyaudio
 import numpy
+import matplotlib.mlab
+import matplotlib.pylab
 import struct
 
 import light_acpi as lacpi
@@ -79,11 +81,15 @@ def asus_soundlight(do_print=True):
             except IOError:
                 pass
             # Do FFT
-            levels = calculate_levels(data, samplerate)
+            levels = get_cutouts(data, samplerate)
+
             # Make all levels to be between 0 and 255
             l_max = max(levels)
             l_min = min(levels)
-            mult = 255 / (l_max - l_min)
+            if l_min != l_max:
+                mult = 255 / (l_max - l_min)
+            else:
+                mult = 1
             for idx in range(0, SEGMENTS):
                 levels[idx] = int(round((levels[idx] - l_min) * mult))
 
@@ -102,57 +108,51 @@ def asus_soundlight(do_print=True):
         stream.close()
         paud.terminate()
 
-def smooth_window(fftx, ffty, degree=10):
-    """
-    Smooth the fft data
-    """
-    lxdata, lydata = fftx[degree:-degree], []
-    for i in range(degree, len(ffty)-degree):
-        lydata.append(sum(ffty[i-degree:i+degree]))
-    return [lxdata, lydata]
+SSET = [0.00075, 2.1, 27, 18, 12, 5.6, 3.0, 1.5, 0.8]
 
-def detrend(fftx, ffty, degree=10):
+def get_cutouts(chunkdata, srate, nfft=512): #pylint: disable-msg=R0914
     """
-    Detrend the fft data
-    """
-    lxdata, lydata = fftx[degree:-degree], []
-    for i in range(degree, len(ffty)-degree):
-        lydata.append(ffty[i] - sum(ffty[i-degree:i+degree])/(degree*2))
-    return [lxdata, lydata]
+    get a summed amplitude of power spectrum between low_cut and high-cut
+    normalize this, then get amplitudes of specific frequency ranges
+    that correspond to 3 intervals each in bass, midrange, and treble:
 
-def calculate_levels(data, samplerate):
+    20 Hz - 80 Hz = Low Bass
+    80 Hz-160 Hz = Bass
+    160 Hz - 320 Hz = Hi Bass
+    320 Hz - 640 Hz = Low Mid Range
+    640 Hz - 1280 Hz = Mid Mid range
+    1280 Hz - 2560 Hz = High Midrange
+    2560 Hz - 5120 Hz = Low Treble
+    5120 Hz - 10240 Hz = Mid treble
+    10240 Hz- 20480 Hz = High Treble
     """
-    Use FFT to calculate volume for each frequency range segment
-    """
-
     # Convert raw sound data to Numpy array
-    fmt = "%dH"%(len(data)/2)
-    data2 = struct.unpack(fmt, data)
-    data2 = numpy.array(data2, dtype='h')
+    fmt = "%dH"%(len(chunkdata)/2)
+    unpackdata = struct.unpack(fmt, chunkdata)
+    np_chunk = numpy.array(unpackdata, dtype='h')
 
-    # Apply FFT
-    fourier = numpy.fft.fft(data2)
-    ffty = numpy.abs(fourier[0:len(fourier)/2])/1000
-    fftx = numpy.fft.rfftfreq(len(data)/2, 1.0/samplerate)
-    fftx = fftx[0:len(fftx)/4]
-    ffty1 = ffty[:len(ffty)/2]
-    ffty2 = ffty[len(ffty)/2::]+2
-    ffty2 = ffty2[::-1]
-    ffty = ffty1+ffty2
-    ffty = numpy.log(ffty)-2
+    # normalize epoch and then psd
+    norm_chunk = np_chunk / np_chunk.sum()
+    pxx, freqs = matplotlib.mlab.psd(norm_chunk, NFFT=nfft, Fs=srate)
 
-    fftx, ffty = detrend(fftx, ffty, 30)
-    fftx, ffty = smooth_window(fftx, ffty, 10)
-    fftx, ffty = detrend(fftx, ffty, 10)
+    lowbass = pxx[numpy.logical_and(freqs <= 80, freqs >= 20)]
+    midbass = pxx[numpy.logical_and(freqs <= 160, freqs >= 80)]
+    higbass = pxx[numpy.logical_and(freqs <= 320, freqs >= 160)]
+    lowmidr = pxx[numpy.logical_and(freqs <= 640, freqs >= 320)]
+    midmidr = pxx[numpy.logical_and(freqs <= 1280, freqs >= 640)]
+    higmidr = pxx[numpy.logical_and(freqs <= 2560, freqs >= 1280)]
+    lowtreb = pxx[numpy.logical_and(freqs <= 5120, freqs >= 2560)]
+    midtreb = pxx[numpy.logical_and(freqs <= 10240, freqs >= 5120)]
+    higtreb = pxx[numpy.logical_and(freqs <= 20480, freqs >= 10240)]
 
-    fourier = list(ffty)[4:-4]
-    fourier = fourier[:len(fourier)/2]
 
-    size = len(fourier)
+    # the numbers below are based on average music. Could be adjusted
+    return [sum(abs(lowbass)) + SSET[0], sum(abs(midbass)) * SSET[1],
+            sum(abs(higbass)) * SSET[2], sum(abs(lowmidr)) * SSET[3],
+            sum(abs(midmidr)) * SSET[4], sum(abs(higmidr)) * SSET[5],
+            sum(abs(lowtreb)) * SSET[6], sum(abs(midtreb)) * SSET[7],
+            sum(abs(higtreb)) * SSET[8]]
 
-    # Add up for SEGMENTS light codes
-    levels = [sum(fourier[i:(i+size/SEGMENTS)]) for i in xrange(0, size, size/SEGMENTS)][:SEGMENTS]
-    return levels
 
 if __name__ == '__main__':
     list_devices()
