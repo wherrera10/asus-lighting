@@ -9,7 +9,7 @@ Created on Sat Sep 26 11:22:57 2015
 IMPORTANT: run as administrator
 
 Module for calls to the ASUS G20aj ACPIWMI.dll library to manipulate
-the G20aj LEG lighting displays.
+the G20aj LED lighting displays.
 
 The ASUS ACPI and dll's were analyzed by William Hererra, 2015
 """
