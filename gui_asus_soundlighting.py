@@ -155,7 +155,7 @@ class SoundLightApp(tki.Frame):
 
     def get_update_frequency(self):
         """
-        update interval in increments of 0.25 sec
+        update interval is the exponent in (44100 / 2**chunk_exponent) secs
         """
         self.chunk_exponent = int(self.slider.get())
         return self.chunk_exponent
