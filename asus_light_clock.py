@@ -14,38 +14,67 @@ import numpy as np
 import time
 import light_acpi as li
 
-def sixty_colors(ncolors=60):
+def make60colors():
     """
-    get 60 evenly spaced rbg colors
+    60 colors in RGB
     """
-    rgbs = np.zeros(ncolors, dtype=np.int32)
-    idx = 0
-    for colr in xrange(0, 0xffffff, int(0xffffff / ncolors)):
-        rgbs[idx] = int(abs(colr))
-        idx = idx + 1
-        if idx >= ncolors:
-            break
-    return rgbs
+    reds = [255, 242, 229, 216, 203, 190, 177, 164, 151, 138,
+            126, 113, 100, 87, 74, 61, 48, 35, 21, 8,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 13, 26, 39, 52, 65, 78, 91, 104, 117,
+            130, 143, 156, 169, 181, 194, 207, 220, 233, 246]
+
+    greens = [0, 13, 26, 39, 52, 65, 78, 91, 104, 117,
+              130, 143, 156, 169, 181, 194, 207, 220, 233, 246,
+              255, 242, 229, 216, 203, 190, 177, 164, 151, 138,
+              126, 113, 100, 87, 74, 61, 48, 35, 21, 8,
+              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+    blues = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+             0, 13, 26, 39, 52, 65, 78, 91, 104, 117,
+             130, 143, 156, 169, 181, 194, 207, 220, 233, 246,
+             255, 242, 229, 216, 203, 190, 177, 164, 151, 138,
+             126, 113, 100, 87, 74, 61, 48, 35, 21, 8]
+
+    colors = np.zeros(60, dtype=np.int32)
+    for idx in range(60):
+        colors[idx] = blues[idx] + greens[idx] * 0x100 + reds[idx] * 0x10000
+
+    return colors
+
+
+def make24colors():
+    """
+    24 colors in RGB
+    """
+    reds = [255, 224, 192, 160, 128, 96, 64, 32,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            32, 64, 96, 128, 160, 192, 224, 255]
+
+    greens = [0, 32, 64, 96, 128, 160, 192, 224,
+              255, 224, 192, 160, 128, 96, 64, 32,
+              0, 0, 0, 0, 0, 0, 0, 0]
+
+    blues = [0, 0, 0, 0, 0, 0, 0, 0,
+             32, 64, 96, 128, 160, 192, 224, 255,
+             224, 192, 160, 128, 96, 64, 32, 0]
+
+    colors = np.zeros(24, dtype=np.int32)
+    for idx in range(24):
+        colors[idx] = blues[idx] + greens[idx] * 0x100 + reds[idx] * 0x10000
+
+    return colors
+
 
 def hrminsec_colors():
     """
     return intervals for hours, minutes, seconds in 24h time
     """
-    hours = sixty_colors(24)
-    minutes = sixty_colors(60)
+    hours = make24colors()
+    minutes = make60colors()
     seconds = minutes
     return hours, minutes, seconds
 
-def rotate_color_120_240(colr):
-    """
-    return color with two colors at 120 and 240 degrees from it on color wheel
-    """
-    bcol = colr & 0xff
-    gcol = (colr / 0x100) & 0xff
-    rcol = (colr / 0x10000) & 0xff
-    col120 = (gcol * 0x10000) + (bcol * 0x100) + rcol
-    col240 = (bcol * 0x10000) + (rcol * 0x100) + gcol
-    return col120, col240
 
 def localtime_colors(chrs, cmins, csecs):
     """
@@ -60,6 +89,7 @@ def localtime_colors(chrs, cmins, csecs):
     return chrs[hrs], cmins[mins], csecs[secs]
 
 if __name__ == '__main__':
+
     LLI = li.ASUSLighting(li.DPATH, li.LEFT_VERTICAL)
     RLI = li.ASUSLighting(li.DPATH, li.RIGHT_VERTICAL)
     BLI = li.ASUSLighting(li.DPATH, li.BASE_HORIZONTAL)
@@ -71,6 +101,4 @@ if __name__ == '__main__':
         RLI.set_color(CRIGHT)
         BLI.set_color(CBASE)
         time.sleep(1)
-
-
 
