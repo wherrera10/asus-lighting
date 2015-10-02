@@ -86,7 +86,20 @@ def localtime_colors(chrs, cmins, csecs):
     secs = sltime[5]
     if secs > 59:
         secs = 59
-    return chrs[hrs], cmins[mins], csecs[secs]
+    return chrs[hrs], pulsate_hour(cmins[mins], hrs, secs), csecs[secs]
+
+OFF_SECS = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23]
+def pulsate_hour(colr, hrs, secs):
+    """
+    modulate color every 30 sec of the minute based on 12 hr cycle clock
+    """
+    ret = colr
+    if secs % 30 in OFF_SECS and (hrs % 12) * 2 > secs:
+        red = int((colr & 0xff0000) / 3)
+        green = int((colr & 0xff00) / 3)
+        blue = int((colr & 0xff) / 3)
+        ret = red + green + blue
+    return ret
 
 if __name__ == '__main__':
 
