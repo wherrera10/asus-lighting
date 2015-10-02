@@ -94,10 +94,10 @@ def pulsate_hour(colr, hrs, secs):
     modulate color every 30 sec of the minute based on 12 hr cycle clock
     """
     ret = colr
-    if secs % 30 in OFF_SECS and (hrs % 12) * 2 > secs:
-        red = int((colr & 0xff0000) / 3)
-        green = int((colr & 0xff00) / 3)
-        blue = int((colr & 0xff) / 3)
+    if secs % 30 in OFF_SECS and int(hrs % 12) * 2 > secs % 30:
+        red = int((colr & 0xff) * 0x10000)
+        green = int((colr & 0xff0000) / 0x100)
+        blue = int((colr & 0xff00) / 0x100)
         ret = red + green + blue
     return ret
 
