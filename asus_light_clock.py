@@ -113,5 +113,5 @@ if __name__ == '__main__':
         LLI.set_color(CLEFT)
         RLI.set_color(CRIGHT)
         BLI.set_color(CBASE)
-        time.sleep(1)
+        time.sleep(0.25)
 
