@@ -63,7 +63,7 @@ class BreathingApp(tki.Frame): #pylint: disable-msg=R0902
 
         ttk.Separator(root, orient=tki.HORIZONTAL).pack(fill=tki.BOTH, expand=1)
 
-        # choose audio input device via radio button
+        # choose colors via radio button
         self.leftcolor = 0xff0000
         self.rightcolor = 0x0000ff
         self.basecolor = 0x00ff00
@@ -92,9 +92,9 @@ class BreathingApp(tki.Frame): #pylint: disable-msg=R0902
                   text="Breathing Rate (bpm)",
                   font="Verdana 12 bold").pack()
         self.slider = tki.Scale(root, from_=6, to=24, tickinterval=1,
-                                sliderlength=10, orient=tki.HORIZONTAL)
+                                sliderlength=5, orient=tki.HORIZONTAL)
         self.slider.set(15)
-        self.slider.pack()
+        self.slider.pack(fill=tki.BOTH, expand=1)
 
         ttk.Separator(root, orient=tki.HORIZONTAL).pack(fill=tki.BOTH, expand=1)
 
