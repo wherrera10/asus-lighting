@@ -9,6 +9,12 @@ Python 2.7 code to analyze sound and use as interface with ASUS G20 lighting
 
 IMPORTANT: run as administrator
 
+Acknowledgements:
+
+This file's code structure owes greatly to the following project:
+    Juliana Pena's Arduino code at 
+    http://julip.co/2012/05/arduino-python-soundlight-spectrum/
+
 """
 
 import pyaudio
