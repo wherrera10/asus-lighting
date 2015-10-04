@@ -177,6 +177,11 @@ class BreathingApp(tki.Frame): #pylint: disable-msg=R0902
         # get breathing rate sleep/update time interval for frames
         tinterval = 2.0 / self.get_resp_rate()
         fnum = 30
+        # the ACPI call takes time, so shrink fnum for faster rates
+        if self.resp_rate > 8:
+            fnum -= int(self.resp_rate / 2)
+        if fnum < 5:
+            fnum = 5
 
         # get colors
         colors = [self.leftcolor, self.rightcolor, self.basecolor]
