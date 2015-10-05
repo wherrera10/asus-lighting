@@ -12,7 +12,7 @@ IMPORTANT: run as administrator
 Acknowledgements:
 
 This file's code structure owes greatly to the following project:
-    Juliana Pena's Arduino code at 
+    Juliana Pena's Arduino code at
     http://julip.co/2012/05/arduino-python-soundlight-spectrum/
 
 """
@@ -88,15 +88,12 @@ def asus_soundlight(do_print=True):
             # Do FFT
             levels = get_cutouts(data, samplerate)
 
-            # Make all levels to be between 0 and 255
+            # Make all levels to be <= 255
             l_max = max(levels)
-            l_min = min(levels)
-            if l_min != l_max:
-                mult = 255 / (l_max - l_min)
-            else:
-                mult = 1
             for idx in range(0, SEGMENTS):
-                levels[idx] = int(round((levels[idx] - l_min) * mult))
+                levels[idx] = int(round(levels[idx] * 255.0 / l_max))
+
+            saturate_color(levels)
 
             # set ASUS G20aj lighting colors
             b_lighting.set_rgb(levels[0], levels[1], levels[2])
@@ -113,7 +110,45 @@ def asus_soundlight(do_print=True):
         stream.close()
         paud.terminate()
 
-SSET = [0.00075, 2.1, 27, 18, 12, 5.6, 3.0, 1.5, 0.8]
+def sat_trip(cred, cgreen, cblue):
+    """
+    saturate rgb color
+    """
+    mult = 255.0 / (float(max(cred, cgreen, cblue))**4)
+    return int(mult * float(cred) ** 4), \
+           int(mult * float(cgreen) ** 4), \
+           int(mult * float(cblue) ** 4)
+
+def saturate_color(col):
+    """
+    saturate the colrs representing sound levels
+    """
+    if len(col) == 9:
+        col[0], col[1], col[2] = sat_trip(col[0], col[1], col[2])
+        col[3], col[4], col[5] = sat_trip(col[3], col[4], col[5])
+        col[6], col[7], col[8] = sat_trip(col[6], col[7], col[8])
+    return col
+
+def equalize(levels, within_factor=3.0):
+    """
+    makes levels all within a factor of within of each other
+    """
+    new_levels = []
+    largest = 0.0
+    for idx in range(len(levels)):
+        new_levels.append(numpy.abs(levels[idx]))
+        if new_levels[idx] < 0.0001:
+            new_levels[idx] = 0.0001
+        largest = max(largest, new_levels[idx])
+
+    least_allowed = largest / within_factor
+    loops = 0
+    for idx in range(len(new_levels)):
+        while new_levels[idx] < least_allowed and loops < 100:
+            loops += 1
+            new_levels[idx] *= 2.0
+    return new_levels
+
 
 def get_cutouts(chunkdata, srate, nfft=512): #pylint: disable-msg=R0914
     """
@@ -137,7 +172,11 @@ def get_cutouts(chunkdata, srate, nfft=512): #pylint: disable-msg=R0914
     np_chunk = numpy.array(unpackdata, dtype='h')
 
     # normalize epoch and then psd
-    norm_chunk = np_chunk / np_chunk.sum()
+    sum_chunk = np_chunk.sum()
+    if sum_chunk != 0:
+        norm_chunk = np_chunk / np_chunk.sum()
+    else:
+        norm_chunk = np_chunk
     pxx, freqs = matplotlib.mlab.psd(norm_chunk, NFFT=nfft, Fs=srate)
 
     lowbass = pxx[numpy.logical_and(freqs <= 80, freqs >= 20)]
@@ -150,13 +189,11 @@ def get_cutouts(chunkdata, srate, nfft=512): #pylint: disable-msg=R0914
     midtreb = pxx[numpy.logical_and(freqs <= 10240, freqs >= 5120)]
     higtreb = pxx[numpy.logical_and(freqs <= 20480, freqs >= 10240)]
 
+    sound_levels = [sum(lowbass), sum(midbass), sum(higbass),
+                    sum(lowmidr), sum(midmidr), sum(higmidr),
+                    sum(lowtreb), sum(midtreb), sum(higtreb)]
 
-    # the numbers below are based on average music. Could be adjusted
-    return [sum(abs(lowbass)) + SSET[0], sum(abs(midbass)) * SSET[1],
-            sum(abs(higbass)) * SSET[2], sum(abs(lowmidr)) * SSET[3],
-            sum(abs(midmidr)) * SSET[4], sum(abs(higmidr)) * SSET[5],
-            sum(abs(lowtreb)) * SSET[6], sum(abs(midtreb)) * SSET[7],
-            sum(abs(higtreb)) * SSET[8]]
+    return equalize(sound_levels)
 
 
 if __name__ == '__main__':
