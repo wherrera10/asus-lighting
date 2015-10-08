@@ -174,7 +174,7 @@ def get_cutouts(chunkdata, srate, nfft=512): #pylint: disable-msg=R0914
     # normalize epoch and then psd
     sum_chunk = np_chunk.sum()
     if sum_chunk != 0:
-        norm_chunk = np_chunk / np_chunk.sum()
+        norm_chunk = np_chunk / sum_chunk
     else:
         norm_chunk = np_chunk
     pxx, freqs = matplotlib.mlab.psd(norm_chunk, NFFT=nfft, Fs=srate)
