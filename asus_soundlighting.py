@@ -180,6 +180,7 @@ def get_cutouts(chunkdata, srate, nfft=512): #pylint: disable-msg=R0914
     pxx, freqs = matplotlib.mlab.psd(norm_chunk, NFFT=nfft, Fs=srate)
 
     lowbass = pxx[numpy.logical_and(freqs <= 80, freqs >= 20)]
+    lowbass = lowbass[numpy.logical_and(freqs <= 58, freqs >= 62)] # notch filter 60 Hz
     midbass = pxx[numpy.logical_and(freqs <= 160, freqs >= 80)]
     higbass = pxx[numpy.logical_and(freqs <= 320, freqs >= 160)]
     lowmidr = pxx[numpy.logical_and(freqs <= 640, freqs >= 320)]
