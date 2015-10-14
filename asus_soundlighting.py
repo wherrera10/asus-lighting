@@ -178,17 +178,17 @@ def get_cutouts(chunkdata, srate, nfft=512): #pylint: disable-msg=R0914
     else:
         norm_chunk = np_chunk
     pxx, freqs = matplotlib.mlab.psd(norm_chunk, NFFT=nfft, Fs=srate)
-    # notch filter 60 Hz on low bass
-    lowbass = pxx[numpy.logical_and(freqs <= 80, freqs >= 20,
-                                    numpy.logical_and(freqs > 62, freqs < 58))]
-    midbass = pxx[numpy.logical_and(freqs <= 160, freqs >= 80)]
-    higbass = pxx[numpy.logical_and(freqs <= 320, freqs >= 160)]
-    lowmidr = pxx[numpy.logical_and(freqs <= 640, freqs >= 320)]
-    midmidr = pxx[numpy.logical_and(freqs <= 1280, freqs >= 640)]
-    higmidr = pxx[numpy.logical_and(freqs <= 2560, freqs >= 1280)]
-    lowtreb = pxx[numpy.logical_and(freqs <= 5120, freqs >= 2560)]
-    midtreb = pxx[numpy.logical_and(freqs <= 10240, freqs >= 5120)]
-    higtreb = pxx[numpy.logical_and(freqs <= 20480, freqs >= 10240)]
+    # the low and mid bass is contaminated by psd artifact, so use
+    # portions of high bass instead.
+    lowbass = pxx[numpy.logical_and(freqs <= 200, freqs > 100)]
+    midbass = pxx[numpy.logical_and(freqs <= 300, freqs > 200)],
+    higbass = pxx[numpy.logical_and(freqs <= 400, freqs > 300)]
+    lowmidr = pxx[numpy.logical_and(freqs <= 640, freqs > 400)]
+    midmidr = pxx[numpy.logical_and(freqs <= 1280, freqs > 640)]
+    higmidr = pxx[numpy.logical_and(freqs <= 2560, freqs > 1280)]
+    lowtreb = pxx[numpy.logical_and(freqs <= 5120, freqs > 2560)]
+    midtreb = pxx[numpy.logical_and(freqs <= 10240, freqs > 5120)]
+    higtreb = pxx[numpy.logical_and(freqs <= 20480, freqs > 10240)]
 
     sound_levels = [sum(lowbass), sum(midbass), sum(higbass),
                     sum(lowmidr), sum(midmidr), sum(higmidr),
