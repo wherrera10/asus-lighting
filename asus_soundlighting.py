@@ -178,7 +178,7 @@ def get_cutouts(chunkdata, srate, nfft=512): #pylint: disable-msg=R0914
     else:
         norm_chunk = np_chunk
     pxx, freqs = matplotlib.mlab.psd(norm_chunk, NFFT=nfft, Fs=srate)
-    # the low and mid bass is contaminated by psd artifact, so use
+    # the low and mid bass is contaminated by psd edge artifact, so use
     # portions of high bass instead.
     lowbass = pxx[numpy.logical_and(freqs <= 200, freqs > 100)]
     midbass = pxx[numpy.logical_and(freqs <= 300, freqs > 200)],
@@ -186,8 +186,9 @@ def get_cutouts(chunkdata, srate, nfft=512): #pylint: disable-msg=R0914
     lowmidr = pxx[numpy.logical_and(freqs <= 640, freqs > 400)]
     midmidr = pxx[numpy.logical_and(freqs <= 1280, freqs > 640)]
     higmidr = pxx[numpy.logical_and(freqs <= 2560, freqs > 1280)]
-    lowtreb = pxx[numpy.logical_and(freqs <= 5120, freqs > 2560)]
-    midtreb = pxx[numpy.logical_and(freqs <= 10240, freqs > 5120)]
+    # tweak to treble bands for better color changes during vocals
+    lowtreb = pxx[numpy.logical_and(freqs <= 7000, freqs > 2560)]
+    midtreb = pxx[numpy.logical_and(freqs <= 10240, freqs > 7000)]
     higtreb = pxx[numpy.logical_and(freqs <= 20480, freqs > 10240)]
 
     sound_levels = [sum(lowbass), sum(midbass), sum(higbass),
