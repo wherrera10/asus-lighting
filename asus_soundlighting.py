@@ -181,7 +181,7 @@ def get_cutouts(chunkdata, srate, nfft=512): #pylint: disable-msg=R0914
     # the low and mid bass is contaminated by psd edge artifact, so use
     # portions of high bass instead.
     lowbass = pxx[numpy.logical_and(freqs <= 200, freqs > 100)]
-    midbass = pxx[numpy.logical_and(freqs <= 300, freqs > 200)],
+    midbass = pxx[numpy.logical_and(freqs <= 300, freqs > 200)]
     higbass = pxx[numpy.logical_and(freqs <= 400, freqs > 300)]
     lowmidr = pxx[numpy.logical_and(freqs <= 640, freqs > 400)]
     midmidr = pxx[numpy.logical_and(freqs <= 1280, freqs > 640)]
