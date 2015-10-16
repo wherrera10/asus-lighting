@@ -150,7 +150,7 @@ def equalize(levels, within_factor=3.0):
     return new_levels
 
 
-def get_cutouts(chunkdata, srate, nfft=512): #pylint: disable-msg=R0914
+def get_cutouts(chunkdata, srate, nfft=2048): #pylint: disable-msg=R0914
     """
     get a summed amplitude of power spectrum between low_cut and high-cut
     normalize this, then get amplitudes of specific frequency ranges
