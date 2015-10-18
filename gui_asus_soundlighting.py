@@ -98,7 +98,6 @@ class SoundLightApp(tki.Frame):
         tki.Label(root,
                   text="Doubling increment for Update Interval",
                   font="Verdana 12 bold").pack()
-        self.chunk_exponent = 15
         self.slider = tki.Scale(root,
                                 from_=12, to=18,
                                 tickinterval=1,
@@ -106,6 +105,20 @@ class SoundLightApp(tki.Frame):
                                 orient=tki.HORIZONTAL)
         self.slider.set(15)
         self.slider.pack()
+
+        ttk.Separator(root, orient=tki.HORIZONTAL).pack(fill=tki.BOTH, expand=1)
+
+        # rotation button
+        tki.Label(root,
+                  text="Rotation Interval (0 for Off)",
+                  font="Verdana 12 bold").pack()
+        self.rotation_slider = tki.Scale(root,
+                                         from_=0, to=25,
+                                         tickinterval=5,
+                                         sliderlength=10,
+                                         orient=tki.HORIZONTAL)
+        self.rotation_slider.set(0)
+        self.rotation_slider.pack()
 
         ttk.Separator(root, orient=tki.HORIZONTAL).pack(fill=tki.BOTH, expand=1)
 
@@ -157,8 +170,13 @@ class SoundLightApp(tki.Frame):
         """
         update interval is the exponent in (44100 / 2**chunk_exponent) secs
         """
-        self.chunk_exponent = int(self.slider.get())
-        return self.chunk_exponent
+        return int(self.slider.get())
+
+    def get_rotation_interval(self):
+        """
+        update interval is the exponent in (44100 / 2**chunk_exponent) secs
+        """
+        return int(self.rotation_slider.get())
 
     def audio_to_lighting(self):
         """
@@ -174,6 +192,9 @@ class SoundLightApp(tki.Frame):
 
         # get and set the exponent for the chunk size
         asl.CHUNK_EXPONENT = self.get_update_frequency()
+
+        # get and set the exponent for the rotation interval
+        asl.LIGHT_ROTATION_INTERVAL = self.get_rotation_interval()
 
         def callback():
             """
