@@ -27,6 +27,7 @@ import light_acpi as lacpi
 MAX = 0
 SEGMENTS = 9
 CHUNK_EXPONENT = 15
+LIGHT_ROTATION_INTERVAL = 0
 DEVICE_NUMBER = 2
 
 def list_devices(do_print=True):
@@ -80,6 +81,9 @@ def asus_soundlight(do_print=True):
         r_lighting = lacpi.ASUSLighting(lacpi.DPATH, lacpi.RIGHT_VERTICAL)
         b_lighting = lacpi.ASUSLighting(lacpi.DPATH, lacpi.BASE_HORIZONTAL)
 
+        do_rotate_interval = LIGHT_ROTATION_INTERVAL
+        rotate_state = 0
+
         while True:
             try:
                 data = stream.read(chunk)
@@ -95,6 +99,15 @@ def asus_soundlight(do_print=True):
 
             saturate_color(levels)
 
+            if do_rotate_interval == 1:
+                rotate_state += 1
+                rotate_state %= 3
+                do_rotate_interval = LIGHT_ROTATION_INTERVAL
+
+            if do_rotate_interval > 0:
+                do_rotate_interval -= 1
+                rotate_levels(levels, rotate_state)
+
             # set ASUS G20aj lighting colors
             b_lighting.set_rgb(levels[0], levels[1], levels[2])
             r_lighting.set_rgb(levels[3], levels[4], levels[5])
@@ -109,6 +122,23 @@ def asus_soundlight(do_print=True):
             print "\nStopping"
         stream.close()
         paud.terminate()
+
+def rotate_levels(seq, rtype):
+    """
+    rotate around light postions colors
+    """
+    if rtype == 1:
+        saveseq = seq[:3]
+        seq[:3] = seq[6:]
+        seq[6:] = seq[3:6]
+        seq[3:6] = saveseq
+    elif rtype == 2:
+        saveseq = seq[:3]
+        seq[:3] = seq[3:6]
+        seq[3:6] = seq[6:]
+        seq[6:] = saveseq
+    return seq
+
 
 def sat_trip(cred, cgreen, cblue):
     """
