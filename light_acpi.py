@@ -35,36 +35,28 @@ class ChangeDir(object): #pylint: disable-msg=C0103, R0903
         os.chdir(self.saved_path)
 
 
-##########################################################################
-# OEM-UNDOCUMENTED ASUS DLL API NOTES
-##########################################################################
+"""
+OEM-UNDOCUMENTED ASUS DLL API NOTES
+    The byte code for each light on the ASUS G20 desktop's LED lighting:
+    left vertical light:   0xc00e0000
+    right vertical light:  0xc00d0000
+    base horizontal light: 0xc00c0000
 
-##########################################################################
-#   The byte code for each light on the ASUS G20 desktop's LED lighting:
-#   left vertical light:   0xc00e0000
-#   right vertical light:  0xc00d0000
-#   base horizontal light: 0xc00c0000
-##########################################################################
+    The position of color in second argument 8 byte integer (6 bytes used):
+    red   0x00ff0000
+    green 0x0000ff00
+    blue  0x000000ff
+    Note that other colors use a mix of this type of RGB color coding.
+
+    The DLL calls from ACPIWMI.dll used by my ASUSLighting class:
+    AsWMI_Open() opens the ACPI for calls
+    AsWMI_GetDeviceStatus(?dhand, ?bufref) -- No idea why this seems broken
+    AsWMI_DeviceControl(device, rgb_color) -- Does call to change lighting
+"""
 
 RIGHT_VERTICAL = 0xc00d0000
 LEFT_VERTICAL = 0xc00e0000
 BASE_HORIZONTAL = 0xc00c0000
-
-##########################################################################
-# The position of color in second argument 4 byte integer:
-# red   0x00ff0000
-# green 0x0000ff00
-# blue  0x000000ff
-# Note that other colors use a mix of this type of RGB color coding.
-##########################################################################
-
-##########################################################################
-# The DLL calls from ACPIWMI.dll used by my ASUSLighting class:
-# AsWMI_Open() opens the ACPI for calls
-# AsWMI_GetDeviceStatus(?dhand, ?bufref) -- No idea why this seems broken
-# AsWMI_DeviceControl(device, rgb_color) -- Does call to change lighting
-##########################################################################
-
 
 # might not always be this
 DPATH = '/Program Files (x86)/ASUS/ASUS Manager/Lighting'
@@ -90,7 +82,7 @@ class ASUSLighting(object): #pylint: disable-msg=C0103
 
     def set_color(self, color):
         """
-        Set color of the LED light as a 4-byte integer
+        Set color of the LED light as an 8-byte integer
         The color is of form hex 0x00rrggbb, where rr id red, gg green,
           and bb the blue values of an RGB coded color
         Black is 0, white is 0x00ffffff
