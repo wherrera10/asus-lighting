@@ -47,9 +47,9 @@ end
 
 
 function asus_soundlight(do_print=true)
-    """
+    #=
     Get sound samples and adjust LED light color accordingly
-    """
+    =#
     # Change chunk if too fast/slow, never less than 2**13
     chunk = 2 ^ CHUNK_EXPONENT
     samplerate = 44100
