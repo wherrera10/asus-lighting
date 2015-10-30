@@ -4,7 +4,7 @@
 Created on Sat Sep 26 11:22:57 2015
 @author: William Herrera
 
-Python 2.7 code to analyze sound and use as interface with ASUS G20 lighting
+Julia v0.4 code to analyze sound and use as interface with ASUS G20 lighting
 
 IMPORTANT: run as administrator
 
