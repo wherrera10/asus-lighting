@@ -13,7 +13,7 @@ IMPORTANT: run as administrator
 using AudioIO
 using DSP
 
-include 'LightACPI.jl'
+include("LightACPI.jl")
 using .LightACPI
 
 MAX = 0
@@ -30,9 +30,9 @@ function list_devices(do_print=true)
     text = "Audio Device Options:\n"
     i = 1
     ndev = length(devices)
-    devs = Array(string, ndev)
+    devs = Array{ASCIIString}(ndev)
     for aud in devices
-        if aud.max_input_channels > 0:
+        if aud.max_input_channels > 0
                 dev_line = string(i, ". ", aud.name)
             devs[i] = dev_line
             text = string(text, dev_line, "\n")
@@ -51,7 +51,7 @@ function asus_soundlight(do_print=true)
     Get sound samples and adjust LED light color accordingly
     """
     # Change chunk if too fast/slow, never less than 2**13
-    chunk = 2**CHUNK_EXPONENT
+    chunk = 2 ^ CHUNK_EXPONENT
     samplerate = 44100
 
     # CHANGE THIS TO CORRECT INPUT DEVICE
@@ -86,7 +86,7 @@ function asus_soundlight(do_print=true)
 
         # Make all levels to be <= 255
         l_max = max(levels)
-        for idx 1:SEGMENTS
+        for idx in 1:SEGMENTS
             levels[idx] = int(round(levels[idx] * 255.0 / l_max))
         end
         if do_rotate_interval == 1
@@ -118,16 +118,15 @@ function rotate_levels!(seq, rtype)
     rotate around light postions colors
     =#
     if rtype == 1
-        saveseq = seq[:3]
-        seq[:3] = seq[6:]
-        seq[6:] = seq[3:6]
+        saveseq = seq[1:3]
+        seq[1:3] = seq[6:9]
+        seq[6:9] = seq[3:6]
         seq[3:6] = saveseq
-    end
     elseif rtype == 2
-        saveseq = seq[:3]
-        seq[:3] = seq[3:6]
-        seq[3:6] = seq[6:]
-        seq[6:] = saveseq
+        saveseq = seq[1:3]
+        seq[1:3] = seq[3:6]
+        seq[3:6] = seq[6:9]
+        seq[6:9] = saveseq
     end
     seq
 end
@@ -197,7 +196,7 @@ function summed_spectra(chunkdata, srate, nfft=2048)
     10240 Hz- 20480 Hz = High Treble
     =#
     # Convert raw sound data to doubles
-    dchunk = unpack(chunkdata, T(length(chunkdata)/2), 
+    dchunk = unpack(chunkdata, T(length(chunkdata)/2, 
                                  align_packed, :NativeEndian))
     # normalize epoch and then psd
     sum_chunk = sum(dchunk)
@@ -227,5 +226,5 @@ end
 
 
 list_devices()
-asus_soundlight(do_print=True)
+asus_soundlight(true)
 
