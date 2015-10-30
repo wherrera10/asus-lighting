@@ -51,38 +51,31 @@ function asus_soundlight(do_print=true)
     Get sound samples and adjust LED light color accordingly
     =#
     # Change chunk if too fast/slow, never less than 2**13
-    chunk = 2 ^ CHUNK_EXPONENT
+    chunksize = UInt32(2 ^ CHUNK_EXPONENT)
     samplerate = 44100
 
-    # CHANGE THIS TO CORRECT INPUT DEVICE
-    # Look at recording devices and right click to show hidden devices,
-    # and enable the mixing device. Enabling stereo mixing in your
-    # sound card will make your sound output an input.
-    # Use list_devices() to list all your input devices
-    # and choose the mixed device as input device below
+    #=
+    CHANGE DEVICE_NUMBER TO CORRECT INPUT DEVICE
+    Look at recording devices and right click to show hidden devices,
+    and enable the mixing device. Enabling stereo mixing in your
+    sound card will make your sound output an input.
+    Use list_devices() to list all your input devices
+    and choose the mixed device as input device below.
+    =#
     device = DEVICE_NUMBER
 
-    paud = pyaudio.PyAudio()
-    stream = paud.open(format=pyaudio.paInt16,
-                       channels=2,
-                       rate=samplerate,
-                       input=True,
-                       frames_per_buffer=chunk,
-                       input_device_index=device)
-
+    paud = AudioIO.PortAudioStream(samplerate, chunksize, true, device, 
+                                   AudioIO.paInt16)
     if do_print
         print("Starting, use Ctrl+C to stop")
     end
-    l_lighting = lacpi.ASUSLighting(lacpi.DPATH, lacpi.LEFT_VERTICAL)
-    r_lighting = lacpi.ASUSLighting(lacpi.DPATH, lacpi.RIGHT_VERTICAL)
-    b_lighting = lacpi.ASUSLighting(lacpi.DPATH, lacpi.BASE_HORIZONTAL)
-
     do_rotate_interval = LIGHT_ROTATION_INTERVAL
     rotate_state = 0
     try
     while true
-        data = stream.read(chunk)
-        levels = summed_spectra(data, samplerate)
+        data = paud.stream
+
+        levels = summed_spectra(data, samplerate, chunksize)
 
         # Make all levels to be <= 255
         l_max = max(levels)
@@ -99,17 +92,15 @@ function asus_soundlight(do_print=true)
             rotate_levels!(levels, rotate_state)
         end
         saturate_color!(levels)
-        # set ASUS G20aj lighting colors
-        b_lighting.set_rgb(levels[0], levels[1], levels[2])
-        r_lighting.set_rgb(levels[3], levels[4], levels[5])
-        l_lighting.set_rgb(levels[6], levels[7], levels[8])
+        # set ASUS G20 lighting colors
+        setrgb(BLIGHT, levels[0], levels[1], levels[2])
+        setrgb(RLIGHT, levels[3], levels[4], levels[5])
+        setrgb(LLIGHT, levels[6], levels[7], levels[8])
     end
     finally
         if do_print
             print("\nStopping")
         end
-        stream.close()
-        paud.terminate()
     end
 end
 
@@ -179,7 +170,7 @@ function equalize(levels, within_factor=3.0)
     new_levels
 end
 
-function summed_spectra(chunkdata, srate, nfft=2048)
+function summed_spectra(chunkdata, srate, bufsize, segs=2048)
     #=
     from summed amplitude of power spectrum between low_cut and high-cut
     get amplitudes of specific frequency ranges that correspond to 
@@ -195,15 +186,15 @@ function summed_spectra(chunkdata, srate, nfft=2048)
     5120 Hz - 10240 Hz = Mid treble
     10240 Hz- 20480 Hz = High Treble
     =#
-    # Convert raw sound data to doubles
-    dchunk = unpack(chunkdata, T(length(chunkdata)/2, 
-                                 align_packed, :NativeEndian))
-    # normalize epoch and then psd
-    sum_chunk = sum(dchunk)
+    # Convert raw sound data to 16-bit ints then 64-bit floats
+    dchunk = pointer_to_array(chunkdata, Int32(bufsize / 2))
+    fchunk = map(Float64, dchunk)
+    # normalize epoch and then get welch psd
+    sum_chunk = sum(fchunk)
     if sum_chunk != 0.0
-        dchunk /= sum_chunk
+        fchunk /= sum_chunk
     end
-    pxx, freqs = welch_pgram(dchunk, onesided=true, nfft=nfft, fs=srate)
+    pxx, freqs = welch_pgram(fchunk, fs=44100)
     # the low and mid bass is contaminated by psd edge artifact, so use
     # portions of high bass instead.
     lowbass = pxx[freqs <= 200 && freqs > 100]
@@ -220,7 +211,8 @@ function summed_spectra(chunkdata, srate, nfft=2048)
     sound_levels = [sum(lowbass), sum(midbass), sum(higbass),
                     sum(lowmidr), sum(midmidr), sum(higmidr),
                     sum(lowtreb), sum(midtreb), sum(higtreb)]
-
+    println("got here 1")
+    sleep(0.2)
     return equalize(sound_levels)
 end
 
